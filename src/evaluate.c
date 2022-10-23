@@ -15,7 +15,7 @@ int evaluate(FILE *questionPaper,FILE *answerSheet)
     for(; count < sizeof(questions)/sizeof(questions[0]); ++count) 
     {
        	found = fscanf(questionPaper, "%d,%d,%d", &questions[count].question_id, &questions[count].num_of_option, &questions[count].correct_ans);
-        if (found != 3) continue;
+        if (found != 3) break;
     }
 
     fclose(questionPaper);
@@ -24,8 +24,8 @@ int evaluate(FILE *questionPaper,FILE *answerSheet)
     count = 0;
     for(; count < sizeof(ans)/sizeof(ans[0]); ++count)
     {
-        found = fscanf(answerSheet, "%s,%d,%d", ans[count].participant_name, &ans[count].question_id, &ans[count].option_chosen);
-        if (found != 3) continue;
+        found = fscanf(answerSheet, "%[^,],%d,%d", ans[count].participant_name, &ans[count].question_id, &ans[count].option_chosen);
+        if (found != 3) break;
     }
     fclose(answerSheet);
 
