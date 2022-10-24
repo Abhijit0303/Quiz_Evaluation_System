@@ -1,15 +1,17 @@
 #include "struct.h"
 #include "output_csv.c"
+//#include "sizeOfFile.c"
 //#include "main.c"
 
 int evaluate(FILE *questionPaper,FILE *answerSheet)
 {
+    //int size = sizeOfFile("questionPaper");
 	struct question_paper questions[MAX_SIZE];
     struct answer_sheet ans[MAX_SIZE];
     int count = 0;
     int total_marks;
     int scored_marks = 0, invalid_ans = 0;
-    int i = 0;
+    int j = 0, k;
     int found;
 
     for(; count < sizeof(questions)/sizeof(questions[0]); ++count) 
@@ -29,15 +31,34 @@ int evaluate(FILE *questionPaper,FILE *answerSheet)
     }
     fclose(answerSheet);
 
-    for (; i < count; i++)
+    for (; j < count; j++)
     {
-        if(questions[i].correct_ans == ans[i].option_chosen) {
-            scored_marks += 1;
-        }
-        if(ans[i].option_chosen > questions[i].num_of_option) {
-            invalid_ans += 1;
+        for(k = 0; k < count; k++)
+        {
+            if(questions[j].question_id == ans[k].question_id)
+            {
+                if(questions[j].correct_ans == ans[k].option_chosen)
+                {
+                    scored_marks += 1;
+                }
+                if(ans[j].option_chosen > questions[k].num_of_option)
+                {
+                    invalid_ans += 1;
+                }
+                break;
+            }
         }
     }
+
+    // for (; i < count; i++)
+    // {
+    //     if(questions[i].correct_ans == ans[i].option_chosen) {
+    //         scored_marks += 1;
+    //     }
+    //     if(ans[i].option_chosen > questions[i].num_of_option) {
+    //         invalid_ans += 1;
+    //     }
+    // }
 	//printf("DONE");    
     
     char* name=ans[0].participant_name;
