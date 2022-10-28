@@ -1,19 +1,37 @@
-BIN = ../bin
-SRC = ../src
-OBJ = ../obj
-INC = ../inc
-FILES = ../files
-CFLAGS = -Wall
-LFLAGS = -o
 CC = gcc
-IFLAGS = -I$(INC)
+INC = ../inc
+OBJ = ../obj
+SRC = ../src
+BIN = ../bin
+FILES = ../files
+LDFLAGS = -o
+CFLAGS = -c -g -Wall
 
-build: 
-	$(CC) $(CFLAGS) $(SRC)/main.c $(LFLAGS) QEZ.o $(IFLAGS)
-	mv QEZ.o $(OBJ)
+all: $(BIN)/QES
+
+$(BIN)/QES: $(OBJ)/main.o $(OBJ)/evaluate.o $(OBJ)/output_csv.o
+	$(CC) $(LDFLAGS) $(BIN)/QES $(OBJ)/main.o $(OBJ)/evaluate.o $(OBJ)/output_csv.o
+
+$(OBJ)/main.o: $(SRC)/main.c
+	$(CC) $(CFLAGS) $(SRC)/main.c -I $(INC)/
+	mv *.o $(OBJ)/
+
+$(OBJ)/evaluate.o: $(SRC)/evaluate.c 
+	$(CC) $(CFLAGS) $(SRC)/evaluate.c -I $(INC)/
+	mv *.o $(OBJ)/
+
+$(OBJ)/output_csv.o: $(SRC)/output_csv.c 
+	$(CC) $(CFLAGS) $(SRC)/output_csv.c -I $(INC)/
+	mv *.o $(OBJ)/
 
 run:
-	$(OBJ)/QEZ.o $(FILES)/$(ARGV1) $(FILES)/$(ARGV2)
+	$(BIN)/QES $(FILES)/$(ARGV1) $(FILES)/$(ARGV2)
+	echo "***New Record Successfully Updated in output.csv***"
+
 
 clean:
-	rm -rf $(BIN)/*.o
+	rm -f a.out *.o
+	rm -f $(BIN)/*
+	rm -f $(OBJ)/*.o
+	@echo "Cleaning Done!"
+
