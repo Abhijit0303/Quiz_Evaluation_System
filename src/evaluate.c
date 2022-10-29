@@ -1,68 +1,68 @@
-#include "struct.h"
-#include "output_csv.c"
-//#include "sizeOfFile.c"
-//#include "main.c"
+#include "qes.h"
+
 
 int evaluate(FILE *questionPaper,FILE *answerSheet)
 {
-    //int size = sizeOfFile("questionPaper");
 	struct question_paper questions[MAX_SIZE];
-    struct answer_sheet ans[MAX_SIZE];
     int count = 0;
     int total_marks;
     int scored_marks = 0, invalid_ans = 0;
-    int j = 0, k;
+    int j = 0;
     int found;
+    char *name[MAX_SIZE];
+    int ansQ_id[MAX_SIZE];
+    int ansOption_choosen[MAX_SIZE];
+    int i = 0;
+    char buff[2024];
+    char *token;
 
     for(; count < sizeof(questions)/sizeof(questions[0]); ++count) 
     {
-       	found = fscanf(questionPaper, "%d,%d,%d", &questions[count].question_id, &questions[count].num_of_option, &questions[count].correct_ans);
+         found = fscanf(questionPaper, "%d,%d,%d", &questions[count].question_id, &questions[count].num_of_option, &questions[count].correct_ans);
         if (found != 3) break;
     }
 
     fclose(questionPaper);
     total_marks = count;
-    
-    count = 0;
-    for(; count < sizeof(ans)/sizeof(ans[0]); ++count)
-    {
-        found = fscanf(answerSheet, "%[^,],%d,%d", ans[count].participant_name, &ans[count].question_id, &ans[count].option_chosen);
-        if (found != 3) break;
-    }
-    fclose(answerSheet);
 
-    for (; j < count; j++)
+    while(fgets(buff, 2024, answerSheet))
     {
-        for(k = 0; k < count; k++)
-        {
-            if(questions[j].question_id == ans[k].question_id)
-            {
-                if(questions[j].correct_ans == ans[k].option_chosen)
+        i = 0;
+        token = strtok(buff,",");
+        name[i] = token;
+          // printf( "name: %s\n", name[i]);
+        
+        while( token != NULL ) {
+            token = trimwhitespace(token);  
+            token = strtok(NULL, ",<>");
+            if(token != NULL) {
+                ansQ_id[i] = atoi(token);
+                // printf( "question_id: %d\n", ansQ_id[i]);
+            }
+            token = strtok(NULL, ",<>");
+            if(token != NULL){
+                ansOption_choosen[i] = atoi(token);
+                // printf( "option_chosen: %d\n", ansOption_choosen[i]);
+            }
+            i++;
+        }
+        scored_marks = 0, invalid_ans = 0;
+
+        for(j = 0; j < count; j++) {
+            if(questions[j].question_id == ansQ_id[j]) {
+                if(questions[j].correct_ans == ansOption_choosen[j])
                 {
                     scored_marks += 1;
                 }
-                if(ans[j].option_chosen > questions[k].num_of_option)
+                if(ansOption_choosen[j] > questions[j].num_of_option)
                 {
                     invalid_ans += 1;
                 }
-                break;
             }
         }
+        output_csv(name[0],total_marks,scored_marks,invalid_ans);
     }
-
-    // for (; i < count; i++)
-    // {
-    //     if(questions[i].correct_ans == ans[i].option_chosen) {
-    //         scored_marks += 1;
-    //     }
-    //     if(ans[i].option_chosen > questions[i].num_of_option) {
-    //         invalid_ans += 1;
-    //     }
-    // }
-	//printf("DONE");    
-    
-    char* name=ans[0].participant_name;
-    output_csv(name,total_marks,scored_marks,invalid_ans);
-
+    fclose(answerSheet);
+    printf("total_marks %d\n", total_marks);
     return 0;
 }
